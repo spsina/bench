@@ -3,6 +3,7 @@ from django.db.models import Sum
 from django.dispatch import receiver
 from django.db.models.signals import pre_save
 
+
 class Account(models.Model):
     name = models.CharField(max_length=255)
 
@@ -19,10 +20,12 @@ class Account(models.Model):
 
         return all_deposit - all_withdrawal
 
+
 class Transaction(models.Model):
     amount = models.PositiveIntegerField()
     is_deposit = models.BooleanField()
     account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="transactions")
+
 
 @receiver(pre_save, sender=Transaction)
 def check_balance(sender,instance, **kwargs):
