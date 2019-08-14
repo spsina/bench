@@ -1,0 +1,33 @@
+<!DOCTYPE HTML>
+
+<html>
+<head>
+
+</head>
+<body>
+
+<div id="app-2">
+  <button @click="hello">Start</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+<script>
+    var app2 = new Vue({
+    el: '#app-2',
+    methods: {
+        hello: () => {
+            for(i=0;i<100;i++){
+                axios.get('http://192.168.1.59:8090/withdraw/6200/').then(response => {
+                    console.log(i)
+                    console.log(response)
+                }
+                )
+        }
+        }
+    }
+    })
+</script>
+</body>
+</html>
