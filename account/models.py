@@ -7,6 +7,8 @@ from django.db.models.signals import pre_save
 class Account(models.Model):
     name = models.CharField(max_length=255)
 
+    parity = models.IntegerField(default=0)
+
     @property
     def balance(self):
         all_deposit = self.transactions.filter(is_deposit=True).aggregate(Sum('amount'))['amount__sum']
@@ -26,11 +28,17 @@ class Transaction(models.Model):
     is_deposit = models.BooleanField()
     account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="transactions")
 
+    ip = models.CharField(max_length=50, default=0)
+
 
 @receiver(pre_save, sender=Transaction)
 def check_balance(sender,instance, **kwargs):
-    if  instance.is_deposit:
-        return
-    if instance.account.balance < instance.amount:
-        raise Exception("Under Balance")
-    
+    if instance.is_deposit:
+        instance.account.parity += instance.amount
+        instance.account.save()
+    else:
+        instance.account.parity -= instance.amount
+        instance.account.save()
+
+        if instance.account.balance < instance.amount:
+            raise Exception("Under Balance")

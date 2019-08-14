@@ -18,15 +18,21 @@ def int_with_commas(x):
 
 
 class AccountAdmin(admin.ModelAdmin):
-    list_display = ['name', 'balance']
+    list_display = ['name', 'balance', 'parity_number']
 
     @staticmethod
     def balance(instance):
         return int_with_commas(instance.balance)
 
+    @staticmethod
+    def parity_number(instance):
+        return int_with_commas(instance.parity)
+
 
 class TransactionAdmin(admin.ModelAdmin):
-    list_display = ['account__name', 'amount', 'is_deposit']
+    list_display = ['pk', 'account__name', 'amount', 'is_deposit', 'ip']
+
+    list_filter = ['ip', ]
 
     @staticmethod
     def account__name(instance):
