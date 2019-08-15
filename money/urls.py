@@ -15,10 +15,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from account.views import get_balance, deposit, withdrawal
+from account.views import get_balance, withdrawal
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('balance/', get_balance),
-    path('deposit/<int:amount>/', deposit),
     path('withdraw/<int:amount>/', withdrawal),
 ]

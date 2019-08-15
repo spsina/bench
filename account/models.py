@@ -11,8 +11,10 @@ class Account(models.Model):
 
     @property
     def balance(self):
-        all_deposit = self.transactions.filter(is_deposit=True).aggregate(Sum('amount'))['amount__sum']
-        all_withdrawal = self.transactions.filter(is_deposit=False).aggregate(Sum('amount'))['amount__sum']
+        account = self
+
+        all_deposit = account.transactions.filter(is_deposit=True).aggregate(Sum('amount'))['amount__sum']
+        all_withdrawal = account.transactions.filter(is_deposit=False).aggregate(Sum('amount'))['amount__sum']
         
         if all_deposit is None:
             all_deposit = 0
@@ -22,6 +24,20 @@ class Account(models.Model):
 
         return all_deposit - all_withdrawal
 
+    @classmethod
+    def withdraw(self, the_account, amount, ip):
+        with transaction.atomic():
+            account = Account.objects.select_for_update().get(pk=the_account.pk)
+
+            balance = account.balance
+
+            if balance >= amount:
+                account.parity -= amount
+                Transaction.objects.create(amount=amount, account=account, is_deposit=False, ip=ip)
+                account.save()
+                return True
+            return False
+
 
 class Transaction(models.Model):
     amount = models.PositiveIntegerField()
@@ -29,19 +45,3 @@ class Transaction(models.Model):
     account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="transactions")
 
     ip = models.CharField(max_length=50, default=0)
-
-
-@receiver(pre_save, sender=Transaction)
-def check_balance(sender,instance, **kwargs):
-    with transaction.atomic():
-        account = Account.objects.select_for_update().filter(pk=instance.account.pk).first()
-        
-        if instance.is_deposit:
-            instance.account.parity += instance.amount
-            instance.account.save()
-        else:
-            if instance.account.balance < instance.amount:
-                raise Exception("Under Balance")
-                
-            instance.account.parity -= instance.amount
-            instance.account.save()

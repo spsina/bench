@@ -18,15 +18,10 @@ def get_balance(request):
     return HttpResponse(t.balance)
 
 
-def deposit(request, amount):
-    t = Account.objects.first()
-    Transaction.objects.create(amount=amount, account=t, is_deposit=True, ip=get_client_ip(request))
-
-    return HttpResponse("deposited: " + str(amount))
-
-
 def withdrawal(request, amount):
     t = Account.objects.first()
-    Transaction.objects.create(amount=amount, account=t, is_deposit=False, ip=get_client_ip(request))
-
-    return HttpResponse("withdrawaled: " + str(amount))
+    r = Account.withdraw(t,int(amount),get_client_ip(request))
+    if r:
+        return HttpResponse("withdrawaled: " + str(amount))
+    else:
+        return HttpResponse("withdraw failed: " + str(amount))
