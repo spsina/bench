@@ -1,0 +1,27 @@
+server {
+    listen 80;
+    server_name game.spsina.ir password.spsina.ir;
+
+    location ~ ^/(static|media)/ {
+        root /home/spsina/dev/password_game;
+    }
+
+location / {
+        include proxy_params;
+        proxy_pass http://unix:/home/spsina/dev/password_game/password.sock;
+    }
+}
+
+
+[Unit]
+Description=gunicorn daemon
+After=network.target
+
+[Service]
+User=spsina
+Group=nginx
+WorkingDirectory=/home/spsina/dev/password_game
+ExecStart=/home/spsina/dev/password_game/.venv/bin/gunicorn --access-logfile - --workers 3 --bind unix:/home/spsina/dev/password_game/password.sock thepassword.wsgi:application
+
+[Install]
+WantedBy=multi-user.target
