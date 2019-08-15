@@ -21,7 +21,7 @@ After=network.target
 User=spsina
 Group=nginx
 WorkingDirectory=/home/spsina/dev/password_game
-ExecStart=/home/spsina/dev/password_game/.venv/bin/gunicorn --access-logfile - --workers 3 --bind unix:/home/spsina/dev/password_game/password.sock thepassword.wsgi:application
+ExecStart=/Users/sina/Desktop/dev/balance/.venv/bin/gunicorn --access-logfile - --workers 3 --bind unix:/Users/sina/Desktop/dev/balance/bench.sock money.wsgi:application
 
 [Install]
 WantedBy=multi-user.target

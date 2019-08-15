@@ -2,7 +2,7 @@ from django.db import models
 from django.db.models import Sum
 from django.dispatch import receiver
 from django.db.models.signals import pre_save
-
+from django.db import transaction
 
 class Account(models.Model):
     name = models.CharField(max_length=255)
@@ -33,12 +33,15 @@ class Transaction(models.Model):
 
 @receiver(pre_save, sender=Transaction)
 def check_balance(sender,instance, **kwargs):
-    if instance.is_deposit:
-        instance.account.parity += instance.amount
-        instance.account.save()
-    else:
-        instance.account.parity -= instance.amount
-        instance.account.save()
-
-        if instance.account.balance < instance.amount:
-            raise Exception("Under Balance")
+    with transaction.atomic():
+        account = Account.objects.select_for_update().filter(pk=instance.account.pk).first()
+        
+        if instance.is_deposit:
+            instance.account.parity += instance.amount
+            instance.account.save()
+        else:
+            if instance.account.balance < instance.amount:
+                raise Exception("Under Balance")
+                
+            instance.account.parity -= instance.amount
+            instance.account.save()
