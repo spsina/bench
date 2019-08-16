@@ -19,5 +19,5 @@ from account.views import get_balance, withdrawal
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('balance/', get_balance),
-    path('withdraw/<int:amount>/', withdrawal),
+    path('withdraw/<int:amount>/<mode>/', withdrawal),
 ]
